@@ -1,9 +1,9 @@
-//edited by Suj
 //import L from 'leaflet';
-import turf from "./myTurf.js";
-import "./PaintPolygon.css";
+import turf from './myTurf.js';
+import './PaintPolygon.css';
 
-("use strict");
+"use strict";
+
 
 const PaintPolygon = L.Control.extend({
   options: {
@@ -191,102 +191,92 @@ const PaintPolygon = L.Control.extend({
   ////////////////
   // Map events
 
+  _addTouchStartListener: function () { 
+    const mapDiv = this._map.getContainer();
+    L.DomEvent.addListener(mapDiv, "touchstart", this._onTouchStart, this);
+  },
+
+  _removeTouchStartListener: function () { 
+    const mapDiv = this._map.getContainer();
+    L.DomEvent.removeListener(mapDiv, "touchstart", this._onTouchStart, this);
+
+    if(this.touchMarker) this._map.removeLayer(this.touchMarker);
+  },
+
   _addMouseListener: function () {
-    this.disableMapTouch();
+    this._map.on("mousemove", this._onMouseMove, this);
+    this._map.on("mousedown", this._onMouseDown, this);
+    this._map.on("mouseup", this._onMouseUp, this);
 
-    let mapDiv = this._map.getContainer();
-
-    let node = document.createElement("div");
-    node.id = "leaflet-paintpolygon-temp-overlay";
-    node.style.overflowY = "hidden";
-    node.overscrollBehavior = "none";
-    node.style.position = "absolute";
-    node.style.boxSizing = "border-box";
-    node.style.zIndex = "998";
-    node.style.top = "0";
-    node.style.left = "0";
-    node.style.width = "100%";
-    node.style.height = "100%";
-
-    node.addEventListener("touchstart", this._onTouchStart.bind(this));
-    node.addEventListener("mousedown", this._onMouseDown.bind(this));
-
-    node.addEventListener("touchmove", this._onTouchMove.bind(this));
-    node.addEventListener("mousemove", this._onMouseMove.bind(this));
-
-    node.addEventListener("touchend", this._onTouchEnd.bind(this));
-    node.addEventListener("mouseup", this._onMouseUp.bind(this));
-
-    mapDiv.appendChild(node);
+    this._addTouchStartListener();
   },
   _removeMouseListener: function () {
-    this.enableMapTouch();
+    
+    this._map.off("mousemove", this._onMouseMove, this);
+    this._map.off("mousedown", this._onMouseDown, this);
+    this._map.off("mouseup", this._onMouseUp, this);
 
-    let mapDiv = this._map.getContainer();
-    let nodes = document.querySelectorAll("#leaflet-paintpolygon-temp-overlay");
-    for (let node of nodes) {
-      mapDiv.removeChild(node);
-    }
+    this._removeTouchStartListener();
   },
-
-  disableMapTouch: function () {
-    // this._map.scrollWheelZoom.disable();
-    this._map.dragging.disable();
-    // this._map.touchZoom.disable()
-    // this._map.doubleClickZoom.disable()
-    // this._map.boxZoom.disable()
-    // this._map.keyboard.disable()
-    if (this._map.tap) map.tap.disable();
-  },
-  enableMapTouch: function () {
-    // this._map.scrollWheelZoom.enable();
-    this._map.dragging.enable();
-    // this._map.touchZoom.enable();
-    // this._map.doubleClickZoom.enable();
-    // this._map.boxZoom.enable();
-    // this._map.keyboard.enable();
-    if (this._map.tap) map.tap.enable();
-  },
-
   _onMouseDown: function (evt) {
+    this._map.dragging.disable();
     this._mousedown = true;
     this._onMouseMove(evt);
   },
   _onMouseUp: function (evt) {
+    this._map.dragging.enable();
     this._mousedown = false;
   },
   _onMouseMove: function (evt) {
-    const point = { x: evt.clientX, y: evt.clientY };
-    let latlng = this._map.containerPointToLatLng(point);
-
-    this._setLatLng(latlng);
+    this._setLatLng(evt.latlng);
     if (this._mousedown === true) {
-      this._stackEvt(latlng, this._map.getZoom(), this._radius, this._action);
+      this._stackEvt(evt.latlng, this._map.getZoom(), this._radius, this._action);
     }
   },
 
-  _onTouchStart: function (evt) {
-    evt.preventDefault();
-    this._mousedown = true;
-    this._onTouchMove(evt);
-  },
+  touchMarker: null,
 
-  _onTouchEnd: function (evt) {
-    evt.preventDefault();
-    this._mousedown = false;
-  },
+  _onTouchStart: function (e) {
+    console.log(e);
+    e.preventDefault();
 
-  _onTouchMove: function (evt) {
-    evt.preventDefault();
-    const point = { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
-    let latlng = this._map.containerPointToLatLng(point);
+    const latlng = this._map.mouseEventToLatLng(e.touches[0]);
 
-    this._setLatLng(latlng);
-    if (this._mousedown === true) {
-      this._stackEvt(latlng, this._map.getZoom(), this._radius, this._action);
+    if (!this.touchMarker) {
+      this.touchMarker = new L.marker(latlng, { draggable: "true" });
+
+      this.touchMarker.on("dragstart", (event) => {
+        console.log("dragstart", event);
+        this._mousedown = true;
+      });
+      this.touchMarker.on("dragend", (event) => {
+        this._mousedown = false;
+
+        var marker = event.target;
+        var position = marker.getLatLng();
+
+        this._map.removeLayer(this.touchMarker);
+        // marker.setLatLng(new L.LatLng(position.lat, position.lng), { draggable: "true" });
+        // this._map.panTo(new L.LatLng(position.lat, position.lng));
+      });
+
+      this.touchMarker.on("drag", (event) => {
+        var marker = event.target;
+        var latlng = marker.getLatLng();
+        this._setLatLng(latlng);
+        if (this._mousedown === true) {
+          this._stackEvt(latlng, this._map.getZoom(), this._radius, this._action);
+        }
+      });
+      this._map.addLayer(this.touchMarker);
+
+    } else { 
+      this.touchMarker.setLatLng(latlng, { draggable: "true" });
+      this._map.addLayer(this.touchMarker);
+
     }
-  },
 
+  },
   ////////////////
 
   _setLatLng: function (latlng) {
@@ -317,31 +307,21 @@ const PaintPolygon = L.Control.extend({
   },
 
   _draw: function (latlng, zoom, radius) {
-    try {
-      if (this._data === undefined || this._data === null) {
-        this.setData(this._getCircleAsPolygon(latlng, zoom, radius));
-      } else {
-        let fc = {
-          type: "FeatureCollection",
-          features: [this._data, this._getCircleAsPolygon(latlng, zoom, radius)],
-        };
-        this.setData(turf.union(fc));
-      }
-    } catch (err) {
-      console.log(err);
+    if (this._data === undefined || this._data === null) {
+      this.setData(this._getCircleAsPolygon(latlng, zoom, radius));
+    } else {
+      let fc = {
+        type: "FeatureCollection",
+        features: [this._data, this._getCircleAsPolygon(latlng, zoom, radius)],
+      };
+      this.setData(turf.union(fc));
     }
   },
   _erase: function (latlng, zoom, radius) {
     if (this._data === undefined || this._data === null) {
       return;
     } else {
-      try {
-        const polygon = this._getCircleAsPolygon(latlng, zoom, radius);
-        const data = turf.difference(this._data, polygon);
-        this.setData(data);
-      } catch (err) {
-        console.log(err);
-      }
+      this.setData(turf.difference(this._data, this._getCircleAsPolygon(latlng, zoom, radius)));
     }
   },
 
@@ -372,7 +352,9 @@ const PaintPolygon = L.Control.extend({
   },
 });
 
+
 L.Control.PaintPolygon = PaintPolygon;
-L.control.paintPolygon = (options) => new L.Control.PaintPolygon(options);
+L.control.paintPolygon = options => new L.Control.PaintPolygon(options);
+
 
 export default PaintPolygon;
