@@ -199,8 +199,11 @@ const PaintPolygon = L.Control.extend({
   _removeTouchStartListener: function () { 
     const mapDiv = this._map.getContainer();
     L.DomEvent.removeListener(mapDiv, "touchstart", this._onTouchStart, this);
-
-    if(this.touchMarker) this._map.removeLayer(this.touchMarker);
+    
+    if (this.touchMarker) {
+      this._map.removeLayer(this.touchMarker);
+      this.touchMarker = null;
+    }
   },
 
   _addMouseListener: function () {
@@ -237,27 +240,24 @@ const PaintPolygon = L.Control.extend({
   touchMarker: null,
 
   _onTouchStart: function (e) {
-    console.log(e);
     e.preventDefault();
+    e.stopPropagation();
 
     const latlng = this._map.mouseEventToLatLng(e.touches[0]);
 
     if (!this.touchMarker) {
       this.touchMarker = new L.marker(latlng, { draggable: "true" });
 
+      
       this.touchMarker.on("dragstart", (event) => {
-        console.log("dragstart", event);
         this._mousedown = true;
+        this.touchMarker.fire('drag');
       });
       this.touchMarker.on("dragend", (event) => {
         this._mousedown = false;
 
         var marker = event.target;
         var position = marker.getLatLng();
-
-        this._map.removeLayer(this.touchMarker);
-        // marker.setLatLng(new L.LatLng(position.lat, position.lng), { draggable: "true" });
-        // this._map.panTo(new L.LatLng(position.lat, position.lng));
       });
 
       this.touchMarker.on("drag", (event) => {
@@ -269,14 +269,19 @@ const PaintPolygon = L.Control.extend({
         }
       });
       this._map.addLayer(this.touchMarker);
-
     } else { 
-      this.touchMarker.setLatLng(latlng, { draggable: "true" });
-      this._map.addLayer(this.touchMarker);
-
+      if (this.touchMarker.dragging._draggable._element === e.target) { 
+        this.touchMarker.fire("dragstart");
+      }
+      else { 
+        this.touchMarker.setLatLng(latlng, { draggable: "true" });
+      }
     }
 
+    
+
   },
+
   ////////////////
 
   _setLatLng: function (latlng) {
