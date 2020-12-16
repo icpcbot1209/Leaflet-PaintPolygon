@@ -11,13 +11,17 @@ const PaintPolygon = L.Control.extend({
     radius: 30,
     minRadius: 10,
     maxRadius: 50,
-    layerOptions: {},
+    layerOptions: {
+      interactive: false,
+    },
     drawOptions: {
       weight: 1,
+      interactive: false,
     },
     eraseOptions: {
       color: "#ff324a",
       weight: 1,
+      interactive: false,
     },
     menu: {
       drawErase: true,
@@ -191,36 +195,27 @@ const PaintPolygon = L.Control.extend({
   ////////////////
   // Map events
 
-  _addTouchStartListener: function () { 
-    const mapDiv = this._map.getContainer();
-    L.DomEvent.addListener(mapDiv, "touchstart", this._onTouchStart, this);
-  },
-
-  _removeTouchStartListener: function () { 
-    const mapDiv = this._map.getContainer();
-    L.DomEvent.removeListener(mapDiv, "touchstart", this._onTouchStart, this);
-    
-    if (this.touchMarker) {
-      this._map.removeLayer(this.touchMarker);
-      this.touchMarker = null;
-    }
-  },
-
   _addMouseListener: function () {
     if (L.Browser.mobile) {
-      console.log('mobile');
-      this._addTouchStartListener();
-    } else { 
+      console.log("mobile");
+      const mapDiv = this._map.getContainer();
+      L.DomEvent.addListener(mapDiv, "touchstart", this._onTouchStart, this);
+      L.DomEvent.addListener(mapDiv, "touchmove", this._onTouchMove, this);
+      L.DomEvent.addListener(mapDiv, "touchend", this._onTouchEnd, this);
+    } else {
       console.log("desktop");
       this._map.on("mousemove", this._onMouseMove, this);
       this._map.on("mousedown", this._onMouseDown, this);
       this._map.on("mouseup", this._onMouseUp, this);
     }
   },
-  _removeMouseListener: function () {   
+  _removeMouseListener: function () {
     if (L.Browser.mobile) {
-      this._removeTouchStartListener();
-    } else { 
+      const mapDiv = this._map.getContainer();
+      L.DomEvent.removeListener(mapDiv, "touchstart", this._onTouchStart, this);
+      L.DomEvent.removeListener(mapDiv, "touchmove", this._onTouchMove, this);
+      L.DomEvent.removeListener(mapDiv, "touchend", this._onTouchEnd, this);
+    } else {
       this._map.off("mousemove", this._onMouseMove, this);
       this._map.off("mousedown", this._onMouseDown, this);
       this._map.off("mouseup", this._onMouseUp, this);
@@ -231,59 +226,37 @@ const PaintPolygon = L.Control.extend({
     this._mousedown = true;
     this._onMouseMove(evt);
   },
-  _onMouseUp: function (evt) {
-    this._map.dragging.enable();
-    this._mousedown = false;
-  },
   _onMouseMove: function (evt) {
     this._setLatLng(evt.latlng);
     if (this._mousedown === true) {
       this._stackEvt(evt.latlng, this._map.getZoom(), this._radius, this._action);
     }
   },
+  _onMouseUp: function (evt) {
+    this._map.dragging.enable();
+    this._mousedown = false;
+  },
 
-  touchMarker: null,
+  _onTouchStart: function (evt) {
+    L.DomEvent.stop(evt);
 
-  _onTouchStart: function (e) {
-    e.preventDefault();
-    e.stopPropagation();
+    evt.target.style.overflowY = "hidden";
+    evt.target.overscrollBehavior = "none";
 
-    console.log(e);
-
-    const latlng = this._map.mouseEventToLatLng(e.touches[0]);
-
-    if (!this.touchMarker) {
-      this.touchMarker = new L.marker(latlng, { draggable: "true" });
-
-      this.touchMarker.on("dragstart", (event) => {
-        this._mousedown = true;
-        this.touchMarker.fire('drag');
-      });
-      this.touchMarker.on("dragend", (event) => {
-        this._mousedown = false;
-
-        var marker = event.target;
-        var position = marker.getLatLng();
-      });
-
-      this.touchMarker.on("drag", (event) => {
-        var marker = event.target;
-        var latlng = marker.getLatLng();
-        this._setLatLng(latlng);
-        if (this._mousedown === true) {
-          this._stackEvt(latlng, this._map.getZoom(), this._radius, this._action);
-        }
-      });
-      this._map.addLayer(this.touchMarker);
-    } else { 
-      if (this.touchMarker.dragging._draggable._element === e.target) { 
-        this.touchMarker.fire("dragstart");
-      }
-      else { 
-        this.touchMarker.setLatLng(latlng, { draggable: "true" });
-      }
+    this._mousedown = true;
+    this._onTouchMove(evt);
+  },
+  _onTouchMove: function(evt) {
+    L.DomEvent.stop(evt);
+    const latlng = this._map.mouseEventToLatLng(evt.touches.pop());
+    this._setLatLng(latlng);
+    if (this._mousedown === true) {
+      this._stackEvt(latlng, this._map.getZoom(), this._radius, this._action);
     }
-
+  },
+  _onTouchEnd: function(evt) {
+    L.DomEvent.stop(evt);
+    this._mousedown = false;
   },
 
   ////////////////
