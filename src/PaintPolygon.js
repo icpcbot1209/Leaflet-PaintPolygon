@@ -207,19 +207,24 @@ const PaintPolygon = L.Control.extend({
   },
 
   _addMouseListener: function () {
-    this._map.on("mousemove", this._onMouseMove, this);
-    this._map.on("mousedown", this._onMouseDown, this);
-    this._map.on("mouseup", this._onMouseUp, this);
-
-    this._addTouchStartListener();
+    if (L.Browser.mobile) {
+      console.log('mobile');
+      this._addTouchStartListener();
+    } else { 
+      console.log("desktop");
+      this._map.on("mousemove", this._onMouseMove, this);
+      this._map.on("mousedown", this._onMouseDown, this);
+      this._map.on("mouseup", this._onMouseUp, this);
+    }
   },
-  _removeMouseListener: function () {
-    
-    this._map.off("mousemove", this._onMouseMove, this);
-    this._map.off("mousedown", this._onMouseDown, this);
-    this._map.off("mouseup", this._onMouseUp, this);
-
-    this._removeTouchStartListener();
+  _removeMouseListener: function () {   
+    if (L.Browser.mobile) {
+      this._removeTouchStartListener();
+    } else { 
+      this._map.off("mousemove", this._onMouseMove, this);
+      this._map.off("mousedown", this._onMouseDown, this);
+      this._map.off("mouseup", this._onMouseUp, this);
+    }
   },
   _onMouseDown: function (evt) {
     this._map.dragging.disable();
@@ -243,12 +248,13 @@ const PaintPolygon = L.Control.extend({
     e.preventDefault();
     e.stopPropagation();
 
+    console.log(e);
+
     const latlng = this._map.mouseEventToLatLng(e.touches[0]);
 
     if (!this.touchMarker) {
       this.touchMarker = new L.marker(latlng, { draggable: "true" });
 
-      
       this.touchMarker.on("dragstart", (event) => {
         this._mousedown = true;
         this.touchMarker.fire('drag');
@@ -277,8 +283,6 @@ const PaintPolygon = L.Control.extend({
         this.touchMarker.setLatLng(latlng, { draggable: "true" });
       }
     }
-
-    
 
   },
 
