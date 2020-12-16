@@ -12,16 +12,16 @@ const PaintPolygon = L.Control.extend({
     minRadius: 10,
     maxRadius: 50,
     layerOptions: {
-      interactive: false,
+      interactive: false, // if this is true, when touching over existing drawing, it will trigger map pan or pull-to-refresh of android
     },
     drawOptions: {
       weight: 1,
-      interactive: false,
+      interactive: false, // if this is true, when touching over existing drawer circle, it will trigger map pan or pull-to-refresh of android
     },
     eraseOptions: {
       color: "#ff324a",
       weight: 1,
-      interactive: false,
+      interactive: false, // if this is true, when touching over existing eraser circle, it will trigger map pan or pull-to-refresh of android
     },
     menu: {
       drawErase: true,
@@ -238,16 +238,18 @@ const PaintPolygon = L.Control.extend({
   },
 
   _onTouchStart: function (evt) {
-    L.DomEvent.stop(evt);
-
-    evt.target.style.overflowY = "hidden";
-    evt.target.overscrollBehavior = "none";
+    L.DomEvent.stop(evt); // Very important to prevent dragging and panning the map
+    const mapDiv = this._map.getContainer();
+    if (evt.target !== mapDiv) return; // to prevent drawing when dragging overlay marker or so
 
     this._mousedown = true;
     this._onTouchMove(evt);
   },
   _onTouchMove: function(evt) {
-    L.DomEvent.stop(evt);
+    L.DomEvent.stop(evt); // Very important to prevent dragging and panning the map
+    const mapDiv = this._map.getContainer();
+    if (evt.target !== mapDiv) return; // to prevent drawing when dragging overlay marker or so
+
     const latlng = this._map.mouseEventToLatLng(evt.touches.pop());
     this._setLatLng(latlng);
     if (this._mousedown === true) {
@@ -255,7 +257,7 @@ const PaintPolygon = L.Control.extend({
     }
   },
   _onTouchEnd: function(evt) {
-    L.DomEvent.stop(evt);
+    L.DomEvent.stop(evt); // Very important to prevent dragging and panning the map
     this._mousedown = false;
   },
 
