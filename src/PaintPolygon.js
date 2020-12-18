@@ -285,9 +285,17 @@ const PaintPolygon = L.Control.extend({
     if (this._metersPerPixel[zoom] === undefined) {
       this._metersPerPixel[zoom] = (40075016.686 * Math.abs(Math.cos((lat * Math.PI) / 180))) / Math.pow(2, zoom + 8);
     }
-    return turf.circle(this._latLngAsGeoJSON(latlng), (this._metersPerPixel[zoom] * radius) / 1000, {
-      //steps: 128
-    });
+
+    let circle = null;
+    try { 
+      circle = turf.circle(this._latLngAsGeoJSON(latlng), (this._metersPerPixel[zoom] * radius) / 1000, {
+        //steps: 128
+      });      
+    } catch (err) { 
+      console.log(err);
+    }
+
+    return circle;
   },
 
   _draw: function (latlng, zoom, radius) {
@@ -298,14 +306,23 @@ const PaintPolygon = L.Control.extend({
         type: "FeatureCollection",
         features: [this._data, this._getCircleAsPolygon(latlng, zoom, radius)],
       };
-      this.setData(turf.union(fc));
+
+      try { 
+        this.setData(turf.union(fc));
+      } catch (err) { 
+        console.log(err);
+      }
     }
   },
   _erase: function (latlng, zoom, radius) {
     if (this._data === undefined || this._data === null) {
       return;
     } else {
-      this.setData(turf.difference(this._data, this._getCircleAsPolygon(latlng, zoom, radius)));
+      try { 
+        this.setData(turf.difference(this._data, this._getCircleAsPolygon(latlng, zoom, radius)));
+      } catch (err) { 
+        console.log(err);
+      }
     }
   },
 
