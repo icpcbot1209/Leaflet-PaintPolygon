@@ -25,10 +25,41 @@
     background-position: 0px -60px;
 }
 
+.leaflet-control-paintpolygon-icon-save {
+    background-image: url('./save.png');
+    background-size: 70% 70%;
+    height: 30px;
+    width: 30px;
+}
+
+.leaflet-control-paintpolygon-icon-down {
+    background-image: url('./image-down.svg');
+    background-size: 70% 70%;
+    height: 30px;
+    width: 30px;
+}
+
+.leaflet-control-paintpolygon-icon-load {
+    background-color: #fff;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .leaflet-control-paintpolygon-icon.leaflet-control-paintpolygon-icon-size {
     background-position: 0px -90px;
 }
 
+.image-upload>input {
+    display: none;
+}
+
+.image-upload, img {
+    width: 23px;
+    height: 23px;
+}
 
 /* Menu */
 
