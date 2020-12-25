@@ -25,7 +25,9 @@ const PaintPolygon = L.Control.extend({
             drawErase: true,
             size: true,
             eraseAll: true,
+            capture: true,
             savgeAll: true,
+            load: true,
         },
     },
 
@@ -107,6 +109,13 @@ const PaintPolygon = L.Control.extend({
     },
     eraseAll: function () {
         this.setData();
+    },
+    capture: function () {
+        html2canvas(document.querySelector("#mapid"), {
+            allowTaint: true,
+        }).then(function (canvas) {
+            console.log(canvas);
+        });
     },
     saveAll: function () {
         let data = JSON.stringify(this._data);
@@ -204,10 +213,25 @@ const PaintPolygon = L.Control.extend({
                 this
             );
         }
+
+        if (this.options.menu.capture !== false) {
+            this._iconCapture = L.DomUtil.create(
+                "a",
+                "leaflet-control-paintpolygon-icon-capture leaflet-control-paintpolygon-icon-capture-save-load",
+                this._container
+            );
+            L.DomEvent.on(
+                this._iconCapture,
+                "click mousedown",
+                this._clickCapture,
+                this
+            );
+        }
+
         if (this.options.menu.saveAll !== false) {
             this._iconSaveAll = L.DomUtil.create(
                 "a",
-                "leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-save",
+                "leaflet-control-paintpolygon-icon-save",
                 this._container
             );
             L.DomEvent.on(
@@ -218,15 +242,14 @@ const PaintPolygon = L.Control.extend({
             );
         }
         if (this.options.menu.load !== false) {
-            
             this._iconLoad = L.DomUtil.create(
                 "div",
-                "leaflet-control-paintpolygon-icon-load",
+                "leaflet-control-paintpolygon-icon-load leaflet-control-paintpolygon-icon-capture-save-load",
                 this._container
             );
             var imageUpload = L.DomUtil.create(
                 "div",
-                "image-upload",
+                "image-load",
                 this._iconLoad
             );
             var inputLabel = L.DomUtil.create(
@@ -235,34 +258,13 @@ const PaintPolygon = L.Control.extend({
                 imageUpload
             );
             inputLabel.setAttribute("for", "file-input");
-            var iconImg = L.DomUtil.create(
-                "img",
-                "",
-                inputLabel
-            );
+            var iconImg = L.DomUtil.create("img", "load-icon", inputLabel);
             iconImg.setAttribute("src", "src/load.png");
-            var fileInput = L.DomUtil.create(
-                "input",
-                "",
-                imageUpload
-            );
+            var fileInput = L.DomUtil.create("input", "", imageUpload);
             fileInput.setAttribute("id", "file-input");
             fileInput.setAttribute("accept", ".json");
             fileInput.setAttribute("type", "file");
             L.DomEvent.on(fileInput, "input change", this._loadMap, this);
-            
-            // L.DomEvent.on(
-            //     this._inputLabel,
-            //     "click mousedown",
-            //     this._clickLoad,
-            //     this
-            // );
-            // <div class="image-upload">
-            //     <label class="input-label" for="file-input">
-            //         <img src="src/load.png" />
-            //     </label>
-            //     <input id="file-input" type="file" accept=".json"/>
-            // </div>
         }
     },
 
@@ -311,6 +313,9 @@ const PaintPolygon = L.Control.extend({
     _clickEraseAll: function (evt) {
         this.eraseAll();
     },
+    _clickCapture: function (evt) {
+        this.capture();
+    },
     _clickSaveAll: function (evt) {
         this.saveAll();
     },
@@ -346,7 +351,7 @@ const PaintPolygon = L.Control.extend({
         try {
             let files = evt.target.files;
             if (!files.length) {
-                alert('No file selected!');
+                alert("No file selected!");
                 return;
             }
             let file = files[0];

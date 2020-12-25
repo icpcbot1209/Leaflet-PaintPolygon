@@ -1,8 +1,7 @@
-
 /*   Icons  */
 
 .leaflet-control-paintpolygon-icon {
-    background-image: url('./PaintPolygon.svg');
+    background-image: url("./PaintPolygon.svg");
     background-repeat: no-repeat;
     height: 30px;
     width: 30px;
@@ -25,48 +24,48 @@
     background-position: 0px -60px;
 }
 
-.leaflet-control-paintpolygon-icon-save {
-    background-image: url('./save.png');
-    background-size: 70% 70%;
-    height: 30px;
-    width: 30px;
+.leaflet-control-paintpolygon-icon-capture {
+    background-image: url("./screenshot.png");
+    background-size: 100% 100%;
 }
 
-.leaflet-control-paintpolygon-icon-down {
-    background-image: url('./image-down.svg');
+.leaflet-control-paintpolygon-icon-save {
+    background-image: url("./save.png");
     background-size: 70% 70%;
-    height: 30px;
-    width: 30px;
 }
 
 .leaflet-control-paintpolygon-icon-load {
     background-color: #fff;
-    height: 30px;
-    width: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.leaflet-control-paintpolygon-icon-capture-save-load {
+    height: 30px;
+    width: 30px;
 }
 
 .leaflet-control-paintpolygon-icon.leaflet-control-paintpolygon-icon-size {
     background-position: 0px -90px;
 }
 
-.image-upload>input {
+.image-load > input {
     display: none;
 }
 
-.image-upload, img {
+.image-load,
+.load-icon {
     width: 23px;
     height: 23px;
 }
 
 /* Menu */
 
-.leaflet-control-paintpolygon-menu  {
+.leaflet-control-paintpolygon-menu {
     background-color: #fff;
     position: absolute;
-    border: 0!important;
+    border: 0 !important;
     max-width: 0;
     max-height: 30px;
     -webkit-transition: all 0.5s;
@@ -78,32 +77,39 @@
     overflow: hidden;
     white-space: nowrap;
 }
-.leaflet-control-paintpolygon-menu-content  {
+.leaflet-control-paintpolygon-menu-content {
     padding: 5px;
     display: inline-block;
     max-width: 250px;
 }
 
-.leaflet-control-paintpolygon-menu-open  {
-    border: inherit!important;
+.leaflet-control-paintpolygon-menu-open {
+    border: inherit !important;
     max-width: 250px;
     max-height: 200px;
 }
 
-.leaflet-control-container .leaflet-top.leaflet-right .leaflet-control-paintpolygon-menu {
+.leaflet-control-container
+    .leaflet-top.leaflet-right
+    .leaflet-control-paintpolygon-menu {
     top: 60px;
     right: 30px;
 }
-.leaflet-control-container .leaflet-top.leaflet-left .leaflet-control-paintpolygon-menu {
+.leaflet-control-container
+    .leaflet-top.leaflet-left
+    .leaflet-control-paintpolygon-menu {
     top: 60px;
     left: 30px;
 }
-.leaflet-control-container .leaflet-bottom.leaflet-right .leaflet-control-paintpolygon-menu {
+.leaflet-control-container
+    .leaflet-bottom.leaflet-right
+    .leaflet-control-paintpolygon-menu {
     bottom: 0px;
     right: 30px;
 }
-.leaflet-control-container .leaflet-bottom.leaflet-left .leaflet-control-paintpolygon-menu {
+.leaflet-control-container
+    .leaflet-bottom.leaflet-left
+    .leaflet-control-paintpolygon-menu {
     bottom: 0px;
     left: 30px;
 }
-
