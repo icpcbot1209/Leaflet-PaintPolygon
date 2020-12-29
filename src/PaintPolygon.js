@@ -275,8 +275,10 @@ const PaintPolygon = L.Control.extend({
             let reader = new FileReader();
             const self = this;
             reader.onload = (event) => {
-                this._allData = JSON.parse(event.target.result);
-                this.setAllData(this._all);
+                this._allData = null;
+                this._newData = JSON.parse(event.target.result);
+                this.setAllData(this._newData);
+                this._newData = null;
             };
             reader.readAsText(file);
         } catch (err) {
@@ -416,7 +418,6 @@ const PaintPolygon = L.Control.extend({
     },
 
     _draw: function (latlng, zoom, radius) {
-        console.log("a");
         if (!this._newData) {
             this.setNewData(this._getCircleAsPolygon(latlng, zoom, radius));
         } else {
