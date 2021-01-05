@@ -138,25 +138,21 @@ const PaintPolygon = L.Control.extend({
     this._allData = null;
     this.setAllData();
   },
-  capture: async function () {
-    var svg = await this._map.getContainer().querySelectorAll("svg")[0];
+  capture: function () {
+    var svg = this._map.getContainer().querySelectorAll("svg")[0];
     console.log(svg);
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
 
-    const { x, y, width, height } = svg.viewBox.baseVal;
-    // console.log(x);
-    // console.log(y);
-    // console.log(width);
-    // console.log(height);
+    let { x, y, width, height } = svg.viewBox.baseVal;
+    x = x + 106;
+    y = y + 79;
 
-    var v = "0 0 " + width + " " + height;
-    // var v = `${x} ${y} ${width} ${height}`;
+    var v = `${x} ${y} ${width} ${height}`;
     svg.setAttribute("viewBox", v);
 
     var c = document.createElement("canvas");
 
-    svg.parentNode.insertBefore(c, svg);
     var div = document.createElement("div");
     div.appendChild(svg);
     canvg(c, div.innerHTML);
@@ -164,12 +160,13 @@ const PaintPolygon = L.Control.extend({
     html2canvas(document.body, {
       useCORS: true,
       onrendered: function (canvas) {
+        canvas.getContext("2d").drawImage(c, 0, 0);
         var a = document.createElement("a");
         a.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        a.download = "somefilename.png";
+        a.download = "map.png";
         a.click();
-        // c.remove();
-        // location.reload();
+        c.remove();
+        location.reload();
       },
     });
   },
@@ -231,7 +228,7 @@ const PaintPolygon = L.Control.extend({
         "leaflet-control-paintpolygon-icon-capture leaflet-control-paintpolygon-icon-capture-save-load",
         this._container
       );
-      L.DomEvent.on(this._iconCapture, "click", this._clickCapture, this);
+      L.DomEvent.on(this._iconCapture, "click mousedown", this._clickCapture, this);
     }
     if (this.options.menu.saveAll !== false) {
       this._iconSaveAll = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon-save", this._container);
@@ -297,6 +294,10 @@ const PaintPolygon = L.Control.extend({
     this.eraseAll();
   },
   _clickCapture: function (evt) {
+    if (evt.type == "mousedown") {
+      L.DomEvent.stop(evt);
+      return;
+    }
     this.capture();
   },
   _clickSaveAll: function (evt) {
