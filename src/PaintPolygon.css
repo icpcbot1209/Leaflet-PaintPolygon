@@ -34,11 +34,26 @@
     background-size: 70% 70%;
 }
 
-.leaflet-control-paintpolygon-icon-load {
+.leaflet-control-paintpolygon-load {
     background-color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.image-load > input {
+    display: none;
+}
+
+.leaflet-control-paintpolygon-icon-load {
+    background-image: url("./load.png");
+    background-size: 70% 70%;
+}
+
+.leaflet-control-paintpolygon-icon-setting {
+    background-image: url("./settings.png");
+    background-size: 70% 70%;
+    border-top: 1px solid #ccc;
 }
 
 .leaflet-control-paintpolygon-icon-capture-save-load {
@@ -50,19 +65,10 @@
     background-position: 0px -90px;
 }
 
-.image-load > input {
-    display: none;
-}
-
-.image-load,
-.load-icon {
-    width: 23px;
-    height: 23px;
-}
-
 /* Menu */
 
-.leaflet-control-paintpolygon-menu {
+.leaflet-control-paintpolygon-menu,
+.leaflet-control-paintpolygon-setting {
     background-color: #fff;
     position: absolute;
     border: 0 !important;
@@ -89,27 +95,35 @@
     max-height: 200px;
 }
 
-.leaflet-control-container
-    .leaflet-top.leaflet-right
-    .leaflet-control-paintpolygon-menu {
+.leaflet-control-container .leaflet-top.leaflet-right .leaflet-control-paintpolygon-menu {
     top: 60px;
     right: 30px;
 }
-.leaflet-control-container
-    .leaflet-top.leaflet-left
-    .leaflet-control-paintpolygon-menu {
+.leaflet-control-container .leaflet-top.leaflet-left .leaflet-control-paintpolygon-menu {
     top: 60px;
     left: 30px;
 }
-.leaflet-control-container
-    .leaflet-bottom.leaflet-right
-    .leaflet-control-paintpolygon-menu {
+.leaflet-control-container .leaflet-bottom.leaflet-right .leaflet-control-paintpolygon-menu {
     bottom: 0px;
     right: 30px;
 }
-.leaflet-control-container
-    .leaflet-bottom.leaflet-left
-    .leaflet-control-paintpolygon-menu {
+.leaflet-control-container .leaflet-bottom.leaflet-left .leaflet-control-paintpolygon-menu {
+    bottom: 0px;
+    left: 30px;
+}
+.leaflet-control-container .leaflet-top.leaflet-right .leaflet-control-paintpolygon-setting {
+    top: 216px;
+    right: 30px;
+}
+.leaflet-control-container .leaflet-top.leaflet-left .leaflet-control-paintpolygon-setting {
+    top: 216px;
+    left: 30px;
+}
+.leaflet-control-container .leaflet-bottom.leaflet-right .leaflet-control-paintpolygon-setting {
+    bottom: 0px;
+    right: 30px;
+}
+.leaflet-control-container .leaflet-bottom.leaflet-left .leaflet-control-paintpolygon-setting {
     bottom: 0px;
     left: 30px;
 }
