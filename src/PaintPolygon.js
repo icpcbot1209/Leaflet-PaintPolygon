@@ -139,7 +139,7 @@ const PaintPolygon = L.Control.extend({
     this.setAllData();
   },
   capture: function () {
-    var svg = this._map.getContainer().querySelectorAll("svg")[0];
+    var svg = this._map.getContainer().querySelectorAll("svg")[0].cloneNode(true);
     console.log(svg);
     svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
     svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
@@ -166,7 +166,7 @@ const PaintPolygon = L.Control.extend({
         a.download = "map.png";
         a.click();
         c.remove();
-        location.reload();
+        // location.reload();
       },
     });
   },
@@ -295,6 +295,8 @@ const PaintPolygon = L.Control.extend({
   },
   _clickCapture: function (evt) {
     if (evt.type == "mousedown") {
+      this.stop();
+      this._resetMenu();
       L.DomEvent.stop(evt);
       return;
     }
