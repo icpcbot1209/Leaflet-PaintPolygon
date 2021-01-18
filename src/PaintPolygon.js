@@ -1,13 +1,13 @@
 //import L from 'leaflet';
-import turf from "./myTurf.js";
-import canvg from "canvg";
-import "./html2canvas.min.js";
-import "./PaintPolygon.css";
+import turf from './myTurf.js';
+import canvg from 'canvg';
+import './html2canvas.min.js';
+import './PaintPolygon.css';
 
-("use strict");
+('use strict');
 const PaintPolygon = L.Control.extend({
   options: {
-    position: "topright",
+    position: 'topright',
     radius: 30,
     minRadius: 10,
     maxRadius: 50,
@@ -16,14 +16,14 @@ const PaintPolygon = L.Control.extend({
     },
     layerEraseOptions: {
       interactive: false, // if this is true, when touching over existing drawing, it will trigger map pan or pull-to-refresh of android
-      color: "#ff324a",
+      color: '#ff324a',
     },
     drawOptions: {
       weight: 1,
       interactive: false, // if this is true, when touching over existing drawer circle, it will trigger map pan or pull-to-refresh of android
     },
     eraseOptions: {
-      color: "#ff324a",
+      color: '#ff324a',
       weight: 1,
       interactive: false, // if this is true, when touching over existing eraser circle, it will trigger map pan or pull-to-refresh of android
     },
@@ -46,10 +46,10 @@ const PaintPolygon = L.Control.extend({
     this.setRadius(this.options.radius);
 
     if (this.options.menu === false) {
-      return L.DomUtil.create("div");
+      return L.DomUtil.create('div');
     }
 
-    this._container = L.DomUtil.create("div", "leaflet-control-paintpolygon leaflet-bar leaflet-control");
+    this._container = L.DomUtil.create('div', 'leaflet-control-paintpolygon leaflet-bar leaflet-control');
     this._createMenu();
     this._circle = L.circleMarker(this._latlng, this.options.drawOptions).setRadius(this._radius).addTo(this._map);
     this.getCanvasXY();
@@ -60,7 +60,7 @@ const PaintPolygon = L.Control.extend({
   },
 
   onRemove: function () {
-    this._map.off("mousemove", this._onMouseMove, this);
+    this._map.off('mousemove', this._onMouseMove, this);
   },
 
   setRadius: function (radius) {
@@ -82,13 +82,13 @@ const PaintPolygon = L.Control.extend({
   },
   startDraw: function () {
     this.stop();
-    this._action = "draw";
+    this._action = 'draw';
     this._addMouseListener();
     this._circle = L.circleMarker(this._latlng, this.options.drawOptions).setRadius(this._radius).addTo(this._map);
   },
   startErase: function () {
     this.stop();
-    this._action = "erase";
+    this._action = 'erase';
     this._addMouseListener();
     this._circle = L.circleMarker(this._latlng, this.options.eraseOptions).setRadius(this._radius).addTo(this._map);
   },
@@ -111,7 +111,7 @@ const PaintPolygon = L.Control.extend({
   },
   setNewData: function (data) {
     this._newData = data;
-    if (this._action == "draw") {
+    if (this._action == 'draw') {
       if (this._layer !== undefined) {
         this._layer.remove();
       }
@@ -126,14 +126,14 @@ const PaintPolygon = L.Control.extend({
   setAllData: function () {
     if (this._allData) {
       let fc = {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: [this._allData, this._newData],
       };
       try {
-        if (this._action == "draw") {
+        if (this._action == 'draw') {
           this._allData = turf.union(fc);
         }
-        if (this._action == "erase") {
+        if (this._action == 'erase') {
           this._allData = turf.difference(this._allData, this._newData);
         }
       } catch (err) {
@@ -151,7 +151,7 @@ const PaintPolygon = L.Control.extend({
     return this._newData;
   },
   getCanvasXY: function () {
-    var svg = this._map.getContainer().querySelectorAll("svg")[0];
+    var svg = this._map.getContainer().querySelectorAll('svg')[0];
     let { x, y, width, height } = svg.viewBox.baseVal;
     this._canvasX = x;
     this._canvasY = y;
@@ -161,53 +161,59 @@ const PaintPolygon = L.Control.extend({
     this.setAllData();
   },
   capture: async function () {
-    var svg = this._map.getContainer().querySelectorAll("svg")[0].cloneNode(true);
-    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    var svg = this._map.getContainer().querySelectorAll('svg')[0].cloneNode(true);
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
 
     let { x, y, width, height } = svg.viewBox.baseVal;
     x = x - this._canvasX;
     y = y - this._canvasY;
 
     var v = `${x} ${y} ${width} ${height}`;
-    svg.setAttribute("viewBox", v);
+    svg.setAttribute('viewBox', v);
 
-    var c = document.createElement("canvas");
+    var c = document.createElement('canvas');
 
-    var div = document.createElement("div");
+    var div = document.createElement('div');
     div.appendChild(svg);
 
-    const ctx = c.getContext("2d");
+    const ctx = c.getContext('2d');
     v = await canvg.from(ctx, div.innerHTML);
     v.start();
 
-    html2canvas(document.body, {
-      useCORS: true,
-      onrendered: function (canvas) {
-        canvas.getContext("2d").drawImage(c, 0, 0);
-        var a = document.createElement("a");
-        a.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        a.download = "map.png";
-        a.click();
-        c.remove();
-      },
+    const promise = new Promise(function (resolve, reject) {
+      html2canvas(document.body, {
+        useCORS: true,
+        onrendered: function (canvas) {
+          canvas.getContext('2d').drawImage(c, 0, 0);
+          var a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+          a.download = 'map.png';
+          a.click();
+          c.remove();
+
+          resolve(a.href);
+        },
+      });
     });
+
+    const dataURL = await promise;
   },
   saveAll: function () {
     let data = JSON.stringify(this._allData);
 
     // Convert the text to BLOB.
-    const textToBLOB = new Blob([data], { type: "text/plain" });
-    const sFileName = "map.json"; // The file to save the data.
+    const textToBLOB = new Blob([data], { type: 'text/plain' });
+    const sFileName = 'map.json'; // The file to save the data.
 
-    let newLink = document.createElement("a");
+    let newLink = document.createElement('a');
     newLink.download = sFileName;
 
     if (window.webkitURL != null) {
       newLink.href = window.webkitURL.createObjectURL(textToBLOB);
     } else {
       newLink.href = window.URL.createObjectURL(textToBLOB);
-      newLink.style.display = "none";
+      newLink.style.display = 'none';
       document.body.appendChild(newLink);
     }
 
@@ -218,85 +224,89 @@ const PaintPolygon = L.Control.extend({
   // Menu creation and click callback
   _createMenu: function () {
     if (this.options.menu.drawErase !== false) {
-      this._iconDraw = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-brush", this._container);
-      this._iconErase = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-eraser", this._container);
-      L.DomEvent.on(this._iconDraw, "click mousedown", this._clickDraw, this);
-      L.DomEvent.on(this._iconErase, "click mousedown", this._clickErase, this);
+      this._iconDraw = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-brush', this._container);
+      this._iconErase = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-eraser', this._container);
+      L.DomEvent.on(this._iconDraw, 'click mousedown', this._clickDraw, this);
+      L.DomEvent.on(this._iconErase, 'click mousedown', this._clickErase, this);
     }
 
     if (this.options.menu.size !== false) {
-      this._iconSize = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-size", this._container);
+      this._iconSize = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-size', this._container);
 
-      this._menu = L.DomUtil.create("div", "leaflet-bar leaflet-control-paintpolygon-menu", this._container);
+      this._menu = L.DomUtil.create('div', 'leaflet-bar leaflet-control-paintpolygon-menu', this._container);
       L.DomEvent.disableClickPropagation(this._menu);
 
-      var menuContent = L.DomUtil.create("div", "leaflet-control-paintpolygon-menu-content", this._menu);
-      var cursor = L.DomUtil.create("input", "", menuContent);
-      cursor.type = "range";
+      var menuContent = L.DomUtil.create('div', 'leaflet-control-paintpolygon-menu-content', this._menu);
+      var cursor = L.DomUtil.create('input', '', menuContent);
+      cursor.type = 'range';
       cursor.value = this._radius;
       cursor.min = this.options.minRadius;
       cursor.max = this.options.maxRadius;
 
-      L.DomEvent.on(cursor, "input change", this._cursorMove, this);
-      L.DomEvent.on(this._iconSize, "click mousedown", this._clickSize, this);
+      L.DomEvent.on(cursor, 'input change', this._cursorMove, this);
+      L.DomEvent.on(this._iconSize, 'click mousedown', this._clickSize, this);
     }
 
     if (this.options.menu.eraseAll !== false) {
-      this._iconEraseAll = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-trash", this._container);
-      L.DomEvent.on(this._iconEraseAll, "click mousedown", this._clickEraseAll, this);
+      this._iconEraseAll = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-trash', this._container);
+      L.DomEvent.on(this._iconEraseAll, 'click mousedown', this._clickEraseAll, this);
     }
     if (this.options.menu.capture !== false) {
       this._iconCapture = L.DomUtil.create(
-        "a",
-        "leaflet-control-paintpolygon-icon-capture leaflet-control-paintpolygon-icon-capture-save-load",
+        'a',
+        'leaflet-control-paintpolygon-icon-capture leaflet-control-paintpolygon-icon-capture-save-load',
         this._container
       );
-      L.DomEvent.on(this._iconCapture, "click mousedown", this._clickCapture, this);
+      L.DomEvent.on(this._iconCapture, 'click mousedown', this._clickCapture, this);
     }
     if (this.options.menu.saveAll !== false) {
-      this._iconSaveAll = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon-save", this._container);
-      L.DomEvent.on(this._iconSaveAll, "click mousedown", this._clickSaveAll, this);
+      this._iconSaveAll = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon-save', this._container);
+      L.DomEvent.on(this._iconSaveAll, 'click mousedown', this._clickSaveAll, this);
     }
     if (this.options.menu.load !== false) {
-      this._iconLoad = L.DomUtil.create("div", "leaflet-control-paintpolygon-load leaflet-control-paintpolygon-icon-capture-save-load", this._container);
-      var imageUpload = L.DomUtil.create("div", "image-load", this._iconLoad);
-      var inputLabel = L.DomUtil.create("label", "input-label", imageUpload);
-      inputLabel.setAttribute("for", "file-input");
-      var iconImg = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon-load", inputLabel);
-      var fileInput = L.DomUtil.create("input", "", imageUpload);
-      fileInput.setAttribute("id", "file-input");
-      fileInput.setAttribute("accept", ".json");
-      fileInput.setAttribute("type", "file");
-      L.DomEvent.on(fileInput, "input click", this._clickLoadMap, this);
+      this._iconLoad = L.DomUtil.create(
+        'div',
+        'leaflet-control-paintpolygon-load leaflet-control-paintpolygon-icon-capture-save-load',
+        this._container
+      );
+      var imageUpload = L.DomUtil.create('div', 'image-load', this._iconLoad);
+      var inputLabel = L.DomUtil.create('label', 'input-label', imageUpload);
+      inputLabel.setAttribute('for', 'file-input');
+      var iconImg = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon-load', inputLabel);
+      var fileInput = L.DomUtil.create('input', '', imageUpload);
+      fileInput.setAttribute('id', 'file-input');
+      fileInput.setAttribute('accept', '.json');
+      fileInput.setAttribute('type', 'file');
+      L.DomEvent.on(fileInput, 'input click', this._clickLoadMap, this);
     }
     if (this.options.menu.setting !== false) {
-      this._iconSetting = L.DomUtil.create("a", "leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-setting", this._container);
+      this._iconSetting = L.DomUtil.create('a', 'leaflet-control-paintpolygon-icon leaflet-control-paintpolygon-icon-setting', this._container);
 
-      this._settingContent = L.DomUtil.create("div", "leaflet-bar leaflet-control-paintpolygon-setting", this._container);
+      this._settingContent = L.DomUtil.create('div', 'leaflet-bar leaflet-control-paintpolygon-setting', this._container);
       L.DomEvent.disableClickPropagation(this._settingContent);
 
-      var menuContent = L.DomUtil.create("div", "leaflet-control-paintpolygon-menu-content", this._settingContent);
-      var checkbox = L.DomUtil.create("input", "", menuContent);
-      menuContent.style.display = "flex";
-      checkbox.type = "checkbox";
+      var menuContent = L.DomUtil.create('div', 'leaflet-control-paintpolygon-menu-content', this._settingContent);
+      var checkbox = L.DomUtil.create('input', '', menuContent);
+      menuContent.style.display = 'flex';
+      checkbox.type = 'checkbox';
       checkbox.value = this._radius;
       checkbox.min = this.options.minRadius;
       checkbox.max = this.options.maxRadius;
-      var label = L.DomUtil.create("label", "", menuContent);
-      label.innerHTML = "Performance";
+      var label = L.DomUtil.create('label', '', menuContent);
+      label.innerHTML = 'Performance';
 
-      L.DomEvent.on(checkbox, "input", this._improvePerformance, this);
-      L.DomEvent.on(this._iconSetting, "click mousedown", this._clickSetting, this);
+      L.DomEvent.on(checkbox, 'input', this._improvePerformance, this);
+      L.DomEvent.on(this._iconSetting, 'click mousedown', this._clickSetting, this);
     }
   },
 
   _clickDraw: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       L.DomEvent.stop(evt);
       return;
     }
     this._resetMenu();
-    if (this._action == "draw") {
+    if (this._action == 'draw') {
       this.stop();
     } else {
       this.startDraw();
@@ -304,12 +314,12 @@ const PaintPolygon = L.Control.extend({
     }
   },
   _clickErase: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       L.DomEvent.stop(evt);
       return;
     }
     this._resetMenu();
-    if (this._action == "erase") {
+    if (this._action == 'erase') {
       this.stop();
     } else {
       this.startErase();
@@ -317,11 +327,11 @@ const PaintPolygon = L.Control.extend({
     }
   },
   _clickSize: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       L.DomEvent.stop(evt);
       return;
     }
-    if (L.DomUtil.hasClass(this._menu, "leaflet-control-paintpolygon-menu-open")) {
+    if (L.DomUtil.hasClass(this._menu, 'leaflet-control-paintpolygon-menu-open')) {
       this._closeMenu(this._menu);
     } else {
       this._openMenu(this._menu);
@@ -329,13 +339,13 @@ const PaintPolygon = L.Control.extend({
   },
 
   _clickSetting: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       this.stop();
       this._resetMenu();
       L.DomEvent.stop(evt);
       return;
     }
-    if (L.DomUtil.hasClass(this._settingContent, "leaflet-control-paintpolygon-menu-open")) {
+    if (L.DomUtil.hasClass(this._settingContent, 'leaflet-control-paintpolygon-menu-open')) {
       this._closeMenu(this._settingContent);
     } else {
       this._openMenu(this._settingContent);
@@ -343,14 +353,14 @@ const PaintPolygon = L.Control.extend({
   },
 
   _clickEraseAll: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       L.DomEvent.stop(evt);
       return;
     }
     this.eraseAll();
   },
   _clickCapture: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       this.stop();
       this._resetMenu();
       L.DomEvent.stop(evt);
@@ -359,14 +369,14 @@ const PaintPolygon = L.Control.extend({
     this.capture();
   },
   _clickSaveAll: function (evt) {
-    if (evt.type == "mousedown") {
+    if (evt.type == 'mousedown') {
       L.DomEvent.stop(evt);
       return;
     }
     this.saveAll();
   },
   _clickLoadMap: function (evt) {
-    if (evt.type == "click") {
+    if (evt.type == 'click') {
       this.stop();
       this._resetMenu();
       evt.target.value = null;
@@ -389,17 +399,17 @@ const PaintPolygon = L.Control.extend({
     }
   },
   _resetMenu: function () {
-    L.DomUtil.removeClass(this._iconDraw, "leaflet-control-paintpolygon-icon-active");
-    L.DomUtil.removeClass(this._iconErase, "leaflet-control-paintpolygon-icon-active");
+    L.DomUtil.removeClass(this._iconDraw, 'leaflet-control-paintpolygon-icon-active');
+    L.DomUtil.removeClass(this._iconErase, 'leaflet-control-paintpolygon-icon-active');
   },
   _activeIconStyle: function (icon) {
-    L.DomUtil.addClass(icon, "leaflet-control-paintpolygon-icon-active");
+    L.DomUtil.addClass(icon, 'leaflet-control-paintpolygon-icon-active');
   },
   _openMenu: function (menu) {
-    L.DomUtil.addClass(menu, "leaflet-control-paintpolygon-menu-open");
+    L.DomUtil.addClass(menu, 'leaflet-control-paintpolygon-menu-open');
   },
   _closeMenu: function (menu) {
-    L.DomUtil.removeClass(menu, "leaflet-control-paintpolygon-menu-open");
+    L.DomUtil.removeClass(menu, 'leaflet-control-paintpolygon-menu-open');
   },
   _cursorMove: function (evt) {
     this.setRadius(evt.target.valueAsNumber);
@@ -415,28 +425,28 @@ const PaintPolygon = L.Control.extend({
 
   _addMouseListener: function () {
     if (L.Browser.mobile) {
-      console.log("mobile");
+      console.log('mobile');
       const mapDiv = this._map.getContainer();
-      L.DomEvent.addListener(mapDiv, "touchstart", this._onTouchStart, this);
-      L.DomEvent.addListener(mapDiv, "touchmove", this._onTouchMove, this);
-      L.DomEvent.addListener(mapDiv, "touchend", this._onTouchEnd, this);
+      L.DomEvent.addListener(mapDiv, 'touchstart', this._onTouchStart, this);
+      L.DomEvent.addListener(mapDiv, 'touchmove', this._onTouchMove, this);
+      L.DomEvent.addListener(mapDiv, 'touchend', this._onTouchEnd, this);
     } else {
-      console.log("desktop");
-      this._map.on("mousemove", this._onMouseMove, this);
-      this._map.on("mousedown", this._onMouseDown, this);
-      this._map.on("mouseup", this._onMouseUp, this);
+      console.log('desktop');
+      this._map.on('mousemove', this._onMouseMove, this);
+      this._map.on('mousedown', this._onMouseDown, this);
+      this._map.on('mouseup', this._onMouseUp, this);
     }
   },
   _removeMouseListener: function () {
     if (L.Browser.mobile) {
       const mapDiv = this._map.getContainer();
-      L.DomEvent.removeListener(mapDiv, "touchstart", this._onTouchStart, this);
-      L.DomEvent.removeListener(mapDiv, "touchmove", this._onTouchMove, this);
-      L.DomEvent.removeListener(mapDiv, "touchend", this._onTouchEnd, this);
+      L.DomEvent.removeListener(mapDiv, 'touchstart', this._onTouchStart, this);
+      L.DomEvent.removeListener(mapDiv, 'touchmove', this._onTouchMove, this);
+      L.DomEvent.removeListener(mapDiv, 'touchend', this._onTouchEnd, this);
     } else {
-      this._map.off("mousemove", this._onMouseMove, this);
-      this._map.off("mousedown", this._onMouseDown, this);
-      this._map.off("mouseup", this._onMouseUp, this);
+      this._map.off('mousemove', this._onMouseMove, this);
+      this._map.off('mousedown', this._onMouseDown, this);
+      this._map.off('mouseup', this._onMouseUp, this);
     }
   },
   _onMouseDown: function (evt) {
@@ -500,7 +510,7 @@ const PaintPolygon = L.Control.extend({
 
   _latLngAsGeoJSON: function (latlng) {
     return {
-      type: "Point",
+      type: 'Point',
       coordinates: [latlng.lng, latlng.lat],
     };
   },
@@ -529,7 +539,7 @@ const PaintPolygon = L.Control.extend({
       this.setData(this._getCircleAsPolygon(latlng, zoom, radius));
     } else {
       let fc = {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: [this._allData, this._getCircleAsPolygon(latlng, zoom, radius)],
       };
 
@@ -546,7 +556,7 @@ const PaintPolygon = L.Control.extend({
       this.setNewData(this._getCircleAsPolygon(latlng, zoom, radius));
     } else {
       let fc = {
-        type: "FeatureCollection",
+        type: 'FeatureCollection',
         features: [this._newData, this._getCircleAsPolygon(latlng, zoom, radius)],
       };
 
@@ -597,11 +607,11 @@ const PaintPolygon = L.Control.extend({
     this._processingStack = true;
 
     var evt = this._stack.shift();
-    if (evt.action == "draw") {
+    if (evt.action == 'draw') {
       if (this._isPerformance) {
         this._drawPerformance(evt.latlng, evt.zoom, evt.radius);
       } else this._draw(evt.latlng, evt.zoom, evt.radius);
-    } else if (evt.action == "erase") {
+    } else if (evt.action == 'erase') {
       if (this._isPerformance) {
         this._erasePerformance(evt.latlng, evt.zoom, evt.radius);
       } else this._erase(evt.latlng, evt.zoom, evt.radius);
