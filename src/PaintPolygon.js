@@ -181,8 +181,10 @@ const PaintPolygon = L.Control.extend({
     v = await canvg.from(ctx, div.innerHTML);
     v.start();
 
+    const mapDiv = this._map.getContainer();
+
     const promise = new Promise(function (resolve, reject) {
-      html2canvas(document.body, {
+      html2canvas(mapDiv, {
         useCORS: true,
         onrendered: function (canvas) {
           canvas.getContext('2d').drawImage(c, 0, 0);
