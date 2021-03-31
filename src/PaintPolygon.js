@@ -161,24 +161,25 @@ const PaintPolygon = L.Control.extend({
     this.setAllData();
   },
   capture: async function () {
+    let w = this._map.getContainer().clientWidth;
+    let h = this._map.getContainer().clientHeight;
+
     var svg = this._map.getContainer().querySelectorAll('svg')[0].cloneNode(true);
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-
-    let { x, y, width, height } = svg.viewBox.baseVal;
-    x = x - this._canvasX;
-    y = y - this._canvasY;
-
-    var v = `${x} ${y} ${width} ${height}`;
+    svg.style.transform = 'none';
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    var v = `0 0 ${w} ${h}`;
     svg.setAttribute('viewBox', v);
 
+    let transform = this._map.getContainer().firstChild.style.transform;
+    let offsetX = transform.slice(transform.indexOf('(') + 1, transform.indexOf('px'));
+    let offsetY = transform.slice(transform.indexOf('px,') + 4, transform.indexOf('px,', transform.indexOf('px,') + 4));
+
     var c = document.createElement('canvas');
-
-    var div = document.createElement('div');
-    div.appendChild(svg);
-
     const ctx = c.getContext('2d');
-    v = await canvg.from(ctx, div.innerHTML);
+    v = await canvg.from(ctx, svg.outerHTML);
     v.start();
 
     const mapDiv = this._map.getContainer();
@@ -187,7 +188,7 @@ const PaintPolygon = L.Control.extend({
       html2canvas(mapDiv, {
         useCORS: true,
         onrendered: function (canvas) {
-          canvas.getContext('2d').drawImage(c, 0, 0);
+          canvas.getContext('2d').drawImage(c, Number.parseFloat(offsetX), Number.parseFloat(offsetY), w, h);
           var a = document.createElement('a');
           a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
           a.download = 'map.png';
