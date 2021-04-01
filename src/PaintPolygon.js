@@ -161,6 +161,9 @@ const PaintPolygon = L.Control.extend({
     this.setAllData();
   },
   capture: async function () {
+    let transform = this._map.getContainer().firstChild.style.transform;
+    let offsetX = transform.slice(transform.indexOf('(') + 1, transform.indexOf('px'));
+    let offsetY = transform.slice(transform.indexOf('px,') + 4, transform.indexOf('px,', transform.indexOf('px,') + 4));
     let w = this._map.getContainer().clientWidth;
     let h = this._map.getContainer().clientHeight;
 
@@ -170,12 +173,8 @@ const PaintPolygon = L.Control.extend({
     svg.style.transform = 'none';
     svg.setAttribute('width', w);
     svg.setAttribute('height', h);
-    var v = `0 0 ${w} ${h}`;
+    var v = `${-Number.parseFloat(offsetX)} ${-Number.parseFloat(offsetY)} ${w} ${h}`;
     svg.setAttribute('viewBox', v);
-
-    let transform = this._map.getContainer().firstChild.style.transform;
-    let offsetX = transform.slice(transform.indexOf('(') + 1, transform.indexOf('px'));
-    let offsetY = transform.slice(transform.indexOf('px,') + 4, transform.indexOf('px,', transform.indexOf('px,') + 4));
 
     var c = document.createElement('canvas');
     const ctx = c.getContext('2d');
@@ -188,7 +187,7 @@ const PaintPolygon = L.Control.extend({
       html2canvas(mapDiv, {
         useCORS: true,
         onrendered: function (canvas) {
-          canvas.getContext('2d').drawImage(c, Number.parseFloat(offsetX), Number.parseFloat(offsetY), w, h);
+          canvas.getContext('2d').drawImage(c, 0, 0);
           var a = document.createElement('a');
           a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
           a.download = 'map.png';
