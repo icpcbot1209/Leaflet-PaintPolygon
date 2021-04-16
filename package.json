@@ -39,6 +39,7 @@
     "webpack-dev-server": "^3"
   },
   "dependencies": {
-    "canvg": "^3.0.7"
+    "canvg": "^3.0.7",
+    "html2canvas": "^1.0.0-rc.7"
   }
 }

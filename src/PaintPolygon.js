@@ -1,7 +1,8 @@
 //import L from 'leaflet';
 import turf from './myTurf.js';
 import canvg from 'canvg';
-import './html2canvas.min.js';
+// import './html2canvas.min.js';
+import html2canvas from 'html2canvas';
 import './PaintPolygon.css';
 
 ('use strict');
@@ -184,18 +185,32 @@ const PaintPolygon = L.Control.extend({
     const mapDiv = this._map.getContainer();
 
     const promise = new Promise(function (resolve, reject) {
+      // html2canvas(mapDiv, {
+      //   useCORS: true,
+      //   onrendered: function (canvas) {
+      //     canvas.getContext('2d').drawImage(c, 0, 0);
+      //     var a = document.createElement('a');
+      //     a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+      //     a.download = 'map.png';
+      //     a.click();
+      //     c.remove();
+
+      //     resolve(a.href);
+      //   },
+      // });
+
       html2canvas(mapDiv, {
         useCORS: true,
-        onrendered: function (canvas) {
-          canvas.getContext('2d').drawImage(c, 0, 0);
-          var a = document.createElement('a');
-          a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
-          a.download = 'map.png';
-          a.click();
-          c.remove();
+      }).then(function (canvas) {
+        console.log('asdf');
+        canvas.getContext('2d').drawImage(c, 0, 0);
+        var a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+        a.download = 'map.png';
+        a.click();
+        c.remove();
 
-          resolve(a.href);
-        },
+        resolve(a.href);
       });
     });
 
